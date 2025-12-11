@@ -21,7 +21,7 @@ function App() {
       {/* Dither Background */}
       <div className="dither-background">
         <Dither
-          imageSrc="/Main Image/download.jpg"
+          imageSrc="/MainImage/download.jpg"
           colorNum={6}
           pixelSize={2.5}
           disableAnimation={false}

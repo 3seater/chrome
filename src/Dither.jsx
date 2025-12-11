@@ -209,7 +209,7 @@ function DitheredImage({
 }
 
 export default function Dither({
-  imageSrc = '/Main Image/download.jpg',
+  imageSrc = '/MainImage/download.jpg',
   colorNum = 4,
   pixelSize = 2,
   disableAnimation = false,
