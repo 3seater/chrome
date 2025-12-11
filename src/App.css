@@ -1,0 +1,361 @@
+.app {
+  min-height: 100vh;
+  background: #000;
+  position: relative;
+  overflow-x: hidden;
+}
+
+
+/* Dither Background Container */
+.dither-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Navigation */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3rem;
+  z-index: 100;
+  background: transparent;
+}
+
+.nav-logo {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.nav-link:hover {
+  color: #fff;
+}
+
+/* Hero Fullscreen */
+.hero-fullscreen {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stacked Chrome Text */
+.chrome-stack {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  gap: 0;
+}
+
+.chrome-text {
+  font-family: 'Cloister Black', serif;
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 0.85;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.chrome-1 {
+  color: #fff;
+}
+
+.chrome-2 {
+  color: #888;
+  -webkit-text-stroke: 1px #aaa;
+}
+
+.chrome-3 {
+  color: #444;
+  opacity: 0.7;
+}
+
+/* Spline Hero Container - On Top of Text */
+.spline-hero-container {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.spline-hero-container canvas {
+  background: transparent !important;
+}
+
+.title {
+  display: none;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Main Image Container */
+.main-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.main-image-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 500px;
+  height: 500px;
+}
+
+.main-image {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.frame-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+/* Gallery */
+.gallery {
+  width: 100%;
+  margin-top: 2rem;
+}
+
+/* Chart Container */
+.chart-container {
+  width: 100%;
+  max-width: 1020px;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid #fff;
+}
+
+/* Footer */
+.footer {
+  width: 100%;
+  padding: 2rem 3rem;
+  text-align: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.dexscreener-chart {
+  width: 100%;
+  border: none;
+  display: block;
+  filter: grayscale(100%) contrast(1.2) brightness(0.9);
+}
+
+.gallery-title {
+  display: none;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.gallery-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chrome-frame-small {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.chrome-frame-small::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    rgba(255, 255, 255, 0.3) 100%);
+  z-index: 1;
+  opacity: 0.5;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  transition: opacity 0.4s ease;
+}
+
+.chrome-frame-small::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    transparent 50%, 
+    rgba(0, 0, 0, 0.3) 100%);
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.chrome-frame-small:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 30px rgba(255, 255, 255, 0.15),
+    0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.chrome-frame-small:hover::before {
+  opacity: 0.8;
+}
+
+.chrome-frame-small:hover::after {
+  opacity: 1;
+}
+
+.chrome-frame-small img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chrome-frame-small:hover img {
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .top-nav {
+    padding: 1.5rem;
+  }
+
+  .nav-links {
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.875rem;
+  }
+
+  .chrome-text {
+    font-size: clamp(3rem, 10vw, 6rem);
+  }
+
+  .spline-hero-container {
+    width: 400px;
+    height: 400px;
+  }
+  
+  .main-image-wrapper {
+    width: 100%;
+    max-width: 375px;
+    height: 375px;
+  }
+  
+  .main-image {
+    width: 187.5px;
+    height: 187.5px;
+  }
+
+  .footer {
+    padding: 2rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .frame-overlay {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
