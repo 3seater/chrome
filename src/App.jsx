@@ -30,7 +30,16 @@ function App() {
   }
 
   const toggleChart = () => {
-    setChartOpen(!chartOpen)
+    const newState = !chartOpen
+    setChartOpen(newState)
+    // Prevent body scroll when chart is open
+    if (newState) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
   }
 
   const handleMouseDown = (e) => {
