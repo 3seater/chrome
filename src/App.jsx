@@ -10,7 +10,16 @@ function App() {
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [loading, setLoading] = useState(true)
+  const [ditherReady, setDitherReady] = useState(false)
   const chartRef = useRef(null)
+
+  // Mount dither after a short delay to avoid Three.js conflicts
+  useEffect(() => {
+    const ditherTimer = setTimeout(() => {
+      setDitherReady(true)
+    }, 100)
+    return () => clearTimeout(ditherTimer)
+  }, [])
 
   // Preloader - hide after 2.5 seconds
   useEffect(() => {
@@ -104,15 +113,17 @@ function App() {
     <div className={`app ${!loading ? 'loaded' : ''}`}>
       {/* Dither Background */}
       <div className="dither-background">
-        <Dither
-          imageSrc="/MainImage/download.jpg"
-          colorNum={6}
-          pixelSize={2.5}
-          disableAnimation={false}
-          brightness={0.25}
-          enableMouseInteraction={false}
-          mouseRadius={0}
-        />
+        {ditherReady && (
+          <Dither
+            imageSrc="/MainImage/download.jpg"
+            colorNum={6}
+            pixelSize={2.5}
+            disableAnimation={false}
+            brightness={0.25}
+            enableMouseInteraction={false}
+            mouseRadius={0}
+          />
+        )}
       </div>
 
       {/* Preloader */}
