@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Spline from '@splinetool/react-spline'
+import Dither from './Dither'
 import './App.css'
 
 function App() {
@@ -101,6 +102,19 @@ function App() {
   
   return (
     <div className={`app ${!loading ? 'loaded' : ''}`}>
+      {/* Dither Background */}
+      <div className="dither-background">
+        <Dither
+          imageSrc="/MainImage/download.jpg"
+          colorNum={6}
+          pixelSize={2.5}
+          disableAnimation={false}
+          brightness={0.25}
+          enableMouseInteraction={false}
+          mouseRadius={0}
+        />
+      </div>
+
       {/* Preloader */}
       {loading && (
         <div className="preloader">
