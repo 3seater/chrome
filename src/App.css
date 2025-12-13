@@ -229,18 +229,7 @@
   width: 900px;
   height: 600px;
   background: #020202;
-  border: 3px solid transparent;
-  border-image: repeating-linear-gradient(
-    90deg,
-    #fff 0px,
-    #fff 4px,
-    #666 4px,
-    #666 8px,
-    #fff 8px,
-    #fff 12px,
-    #333 12px,
-    #333 16px
-  ) 3;
+  border: 1px solid #fff;
   z-index: 2000;
   display: flex;
   flex-direction: column;
