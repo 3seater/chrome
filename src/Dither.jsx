@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 
-import { useRef, useEffect, forwardRef, useState } from 'react';
+import { useRef, useEffect, forwardRef, useMemo, memo } from 'react';
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
 import { Effect } from 'postprocessing';
@@ -22,9 +22,6 @@ uniform sampler2D imageTexture;
 uniform float time;
 uniform float brightness;
 uniform vec2 resolution;
-uniform vec2 mousePos;
-uniform int enableMouseInteraction;
-uniform float mouseRadius;
 varying vec2 vUv;
 
 void main() {
@@ -36,18 +33,6 @@ void main() {
   // Apply brightness and subtle wave effect
   float wave = sin(vUv.x * 10.0 + time * 0.5) * 0.05;
   gray = clamp(gray * brightness + wave, 0.0, 1.0);
-  
-  // Mouse interaction effect - very subtle darkening, dither still visible
-  if (enableMouseInteraction == 1) {
-    vec2 screenUv = gl_FragCoord.xy / resolution.xy;
-    vec2 mouseNDC = mousePos / resolution;
-    mouseNDC.y = 1.0 - mouseNDC.y;
-    float dist = length(screenUv - mouseNDC);
-    // Gradual fade from center
-    float effect = 1.0 - smoothstep(mouseRadius * 0.2, mouseRadius, dist);
-    // Very subtle darkening - dither still visible underneath
-    gray *= (1.0 - effect * 0.4);
-  }
   
   gl_FragColor = vec4(vec3(gray), texColor.a);
 }
@@ -124,72 +109,45 @@ const RetroEffect = forwardRef((props, ref) => {
 
 RetroEffect.displayName = 'RetroEffect';
 
-function DitheredImage({
+const DitheredImage = memo(function DitheredImage({
   imageSrc,
   colorNum,
   pixelSize,
   disableAnimation,
-  brightness,
-  enableMouseInteraction,
-  mouseRadius
+  brightness
 }) {
   const mesh = useRef(null);
-  const mouseRef = useRef(new THREE.Vector2());
   const { viewport, size, gl } = useThree();
   const texture = useLoader(THREE.TextureLoader, imageSrc);
   
-  const imageUniformsRef = useRef({
+  const imageUniforms = useMemo(() => ({
     imageTexture: new THREE.Uniform(null),
     time: new THREE.Uniform(0),
     brightness: new THREE.Uniform(brightness),
-    resolution: new THREE.Uniform(new THREE.Vector2(0, 0)),
-    mousePos: new THREE.Uniform(new THREE.Vector2(0, 0)),
-    enableMouseInteraction: new THREE.Uniform(enableMouseInteraction ? 1 : 0),
-    mouseRadius: new THREE.Uniform(mouseRadius)
-  });
+    resolution: new THREE.Uniform(new THREE.Vector2(0, 0))
+  }), [brightness]);
 
   useEffect(() => {
     if (texture) {
-      imageUniformsRef.current.imageTexture.value = texture;
+      imageUniforms.imageTexture.value = texture;
     }
-  }, [texture]);
+  }, [texture, imageUniforms]);
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();
     const w = Math.floor(size.width * dpr);
     const h = Math.floor(size.height * dpr);
-    const res = imageUniformsRef.current.resolution.value;
+    const res = imageUniforms.resolution.value;
     if (res.x !== w || res.y !== h) {
       res.set(w, h);
     }
-  }, [size, gl]);
+  }, [size, gl, imageUniforms]);
 
   useFrame(({ clock }) => {
-    const u = imageUniformsRef.current;
     if (!disableAnimation) {
-      u.time.value = clock.getElapsedTime();
-    }
-    u.brightness.value = brightness;
-    u.enableMouseInteraction.value = enableMouseInteraction ? 1 : 0;
-    u.mouseRadius.value = mouseRadius;
-    if (enableMouseInteraction) {
-      u.mousePos.value.copy(mouseRef.current);
+      imageUniforms.time.value = clock.getElapsedTime();
     }
   });
-
-  // Use window-level mouse tracking to work through overlapping elements
-  useEffect(() => {
-    if (!enableMouseInteraction) return;
-    
-    const handleMouseMove = (e) => {
-      const rect = gl.domElement.getBoundingClientRect();
-      const dpr = gl.getPixelRatio();
-      mouseRef.current.set((e.clientX - rect.left) * dpr, (e.clientY - rect.top) * dpr);
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [enableMouseInteraction, gl]);
 
   return (
     <>
@@ -198,7 +156,7 @@ function DitheredImage({
         <shaderMaterial
           vertexShader={imageVertexShader}
           fragmentShader={imageFragmentShader}
-          uniforms={imageUniformsRef.current}
+          uniforms={imageUniforms}
         />
       </mesh>
       <EffectComposer>
@@ -206,23 +164,25 @@ function DitheredImage({
       </EffectComposer>
     </>
   );
-}
+});
 
-export default function Dither({
+function Dither({
   imageSrc = '/MainImage/download.jpg',
   colorNum = 4,
   pixelSize = 2,
   disableAnimation = false,
-  brightness = 0.3,
-  enableMouseInteraction = true,
-  mouseRadius = 1
+  brightness = 0.3
 }) {
   return (
     <Canvas
       className="dither-container"
       camera={{ position: [0, 0, 6] }}
       dpr={1}
-      gl={{ antialias: true, preserveDrawingBuffer: true }}
+      gl={{ 
+        antialias: false, 
+        preserveDrawingBuffer: false,
+        powerPreference: 'high-performance'
+      }}
     >
       <DitheredImage
         imageSrc={imageSrc}
@@ -230,10 +190,9 @@ export default function Dither({
         pixelSize={pixelSize}
         disableAnimation={disableAnimation}
         brightness={brightness}
-        enableMouseInteraction={enableMouseInteraction}
-        mouseRadius={mouseRadius}
       />
     </Canvas>
   );
 }
 
+export default memo(Dither);

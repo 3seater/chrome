@@ -1,7 +1,16 @@
+@font-face {
+  font-family: 'HelveticaNeueMedium';
+  src: url('./HelveticaNeueMedium.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: url('/cursor.svg'), auto !important;
 }
 
 body {
@@ -13,11 +22,10 @@ body {
   background: #000;
   color: #fff;
   overflow-x: hidden;
-  cursor: url('/cursor.svg'), auto;
 }
 
 a, button {
-  cursor: url('/cursor.svg'), pointer;
+  cursor: url('/cursor.svg'), pointer !important;
 }
 
 #root {

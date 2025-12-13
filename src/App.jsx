@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react'
 import Spline from '@splinetool/react-spline'
-import Dither from './Dither'
 import './App.css'
 
+// Lazy load Dither for better initial load
+const Dither = lazy(() => import('./Dither'))
+
 function App() {
-  const [copied, setCopied] = useState(false)
   const [chartOpen, setChartOpen] = useState(false)
   const [position, setPosition] = useState({ x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
@@ -17,42 +18,33 @@ function App() {
   useEffect(() => {
     const ditherTimer = setTimeout(() => {
       setDitherReady(true)
-    }, 100)
+    }, 200)
     return () => clearTimeout(ditherTimer)
   }, [])
 
-  // Preloader - hide after 2.5 seconds
+  // Preloader - hide after 3.5 seconds (extended 1s for optimization)
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
-    }, 2500)
+    }, 3500)
     return () => clearTimeout(timer)
   }, [])
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText('$CHROME')
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
-  }
+  const toggleChart = useCallback(() => {
+    setChartOpen(prev => {
+      const newState = !prev
+      if (newState) {
+        document.body.style.overflow = 'hidden'
+        document.body.style.touchAction = 'none'
+      } else {
+        document.body.style.overflow = ''
+        document.body.style.touchAction = ''
+      }
+      return newState
+    })
+  }, [])
 
-  const toggleChart = () => {
-    const newState = !chartOpen
-    setChartOpen(newState)
-    // Prevent body scroll when chart is open
-    if (newState) {
-      document.body.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
-    } else {
-      document.body.style.overflow = ''
-      document.body.style.touchAction = ''
-    }
-  }
-
-  const handleMouseDown = (e) => {
+  const handleMouseDown = useCallback((e) => {
     if (e.target.closest('.chart-header')) {
       setIsDragging(true)
       const rect = chartRef.current.getBoundingClientRect()
@@ -61,20 +53,20 @@ function App() {
         y: e.clientY - rect.top
       })
     }
-  }
+  }, [])
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (isDragging) {
       setPosition({
         x: e.clientX - dragOffset.x,
         y: e.clientY - dragOffset.y
       })
     }
-  }
+  }, [isDragging, dragOffset])
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false)
-  }
+  }, [])
 
   useEffect(() => {
     if (isDragging) {
@@ -85,13 +77,12 @@ function App() {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, handleMouseMove, handleMouseUp])
 
-  // Generate circular text - each letter positioned manually
+  // Generate circular text for preloader
   const letters = ['C', 'H', 'R', 'O', 'M', 'E']
   const [radius, setRadius] = useState(45)
 
-  // Adjust radius based on screen size
   useEffect(() => {
     const updateRadius = () => {
       if (window.innerWidth <= 480) {
@@ -114,15 +105,17 @@ function App() {
       {/* Dither Background */}
       <div className="dither-background">
         {ditherReady && (
-          <Dither
-            imageSrc="/MainImage/download.jpg"
-            colorNum={6}
-            pixelSize={2.5}
-            disableAnimation={false}
-            brightness={0.25}
-            enableMouseInteraction={false}
-            mouseRadius={0}
-          />
+          <Suspense fallback={null}>
+            <Dither
+              imageSrc="/MainImage/download.jpg"
+              colorNum={6}
+              pixelSize={2.5}
+              disableAnimation={false}
+              brightness={0.2}
+              enableMouseInteraction={false}
+              mouseRadius={0}
+            />
+          </Suspense>
         )}
       </div>
 
@@ -131,7 +124,7 @@ function App() {
         <div className="preloader">
           <div className="preloader-circle">
             {letters.map((letter, index) => {
-              const angle = (index * 360) / letters.length - 90 // Start from top
+              const angle = (index * 360) / letters.length - 90
               const radian = (angle * Math.PI) / 180
               const x = Math.cos(radian) * radius
               const y = Math.sin(radian) * radius
@@ -151,72 +144,63 @@ function App() {
         </div>
       )}
 
-      {/* Navigation */}
+      {/* Navigation - Small white centered links */}
       <nav className="top-nav">
-        <span className="nav-item nav-logo">CHROME</span>
-        <div className="nav-right">
-          <a 
-            href="https://pump.fun" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="nav-item"
-          >
-            PUMP.FUN
-          </a>
-          <a 
-            href="https://twitter.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="nav-item"
-          >
-            TWITTER
-          </a>
-          <button className="nav-item" onClick={toggleChart}>
-            CHART
-          </button>
-        </div>
+        <a 
+          href="https://pump.fun" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="nav-item"
+        >
+          PUMP.FUN
+        </a>
+        <a 
+          href="https://twitter.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="nav-item"
+        >
+          TWITTER
+        </a>
+        <button className="nav-item" onClick={toggleChart}>
+          CHART
+        </button>
       </nav>
 
-      {/* Hero Section - 100vh */}
+      {/* Main Content */}
       <section className="hero-section">
-        {/* Left Side - Helvetica Stack */}
-        <div className="left-stack">
-          <h1 className="helvetica-chrome filled">CHROME</h1>
-          <h1 className="helvetica-chrome outline">CHROME</h1>
-        </div>
-
-        {/* Cat Image - Aligned with left text */}
-        <div className="cat-image-container">
-          <img 
-            src="/MainImage/download.jpg" 
-            alt="Chrome Cat"
-            className="cat-image"
-          />
-        </div>
-
-        {/* 3D Spline Assets Container */}
-        <div className="spline-container">
-          {/* Second 3D Spline Asset */}
-          <div className="spline-cross-secondary">
+        {/* Cat Image with Splines - All framed together */}
+        <div className="cat-spline-wrapper">
+          {/* Second 3D Spline Asset - Top Left of cat */}
+          <div className="spline-top-left">
             <Spline 
               scene="https://prod.spline.design/cau2LAbdkh4Z9hKn/scene.splinecode"
             />
           </div>
 
-          {/* 3D Spline Cross */}
-          <div className="spline-cross">
+          {/* Cat Image - Centered */}
+          <div className="cat-image-container">
+            <img 
+              src="/MainImage/download.jpg" 
+              alt="Chrome Cat"
+              className="cat-image"
+              loading="eager"
+            />
+          </div>
+
+          {/* First 3D Spline Asset - Bottom Right of cat */}
+          <div className="spline-bottom-right">
             <Spline 
               scene="https://prod.spline.design/rnkDTG3pfuDvWg70/scene.splinecode?v=2"
             />
           </div>
         </div>
-
-        {/* Right Side - Gothic Stack */}
-        <div className="right-stack">
-          <h1 className="gothic-chrome outline">CHROME</h1>
-          <h1 className="gothic-chrome filled">CHROME</h1>
-        </div>
       </section>
+
+      {/* Footer */}
+      <footer className="footer">
+        © 2025 <span className="footer-chrome">CHROME</span>
+      </footer>
 
       {/* Draggable Chart Popup */}
       {chartOpen && (
@@ -241,6 +225,7 @@ function App() {
               height="100%"
               title="DexScreener Chart"
               className="dexscreener-chart"
+              loading="lazy"
             ></iframe>
           </div>
         </div>
